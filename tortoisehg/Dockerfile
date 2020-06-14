@@ -9,6 +9,7 @@ RUN apt update && apt install -y \
 
 RUN pip install \
     pyqt5 \
+    iniparse \
     mercurial \
     qscintilla
 
@@ -21,6 +22,9 @@ RUN python setup.py install
 FROM izilef/kdiff3qt
 RUN apt update && apt install -y \
         mercurial \
+        git \
+        featherpad \
+        ca-certificates \
         libxcb-icccm4 \
         libxcb-image0 \
         libxcb-keysyms1 \
@@ -42,6 +46,17 @@ RUN apt update && apt install -y \
     apt clean
 COPY --from=build /usr/local/lib/python3.8/site-packages /usr/local/lib/python3.8/site-packages
 COPY --from=build /opt/thg/thg /usr/local/bin/thg
-ENV PYTHONPATH=/usr/local/lib/python3.8/site-packages
 
+ENV PYTHONPATH=/usr/local/lib/python3.8/site-packages \
+    EDITOR=featherpad
+
+RUN useradd --create-home --home-dir /home/tortoisehg tortoisehg && \
+	chown -R tortoisehg:tortoisehg $HOME && \
+    sed -i 's#/usr/bin/python2#/usr/bin/python3#' /usr/bin/hg
+
+WORKDIR /repo
+COPY ./entrypoint.sh /
+
+USER tortoisehg
+ENTRYPOINT [ "/entrypoint.sh" ]
 CMD [ "python3", "/usr/local/bin/thg" ]
