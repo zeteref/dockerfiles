@@ -45,6 +45,7 @@ RUN apt update && apt install -y \
         --no-install-recommends && \
     apt clean
 COPY --from=build /usr/local/lib/python3.8/site-packages /usr/local/lib/python3.8/site-packages
+COPY --from=build /usr/local/share /usr/local/share
 COPY --from=build /opt/thg/thg /usr/local/bin/thg
 
 ENV PYTHONPATH=/usr/local/lib/python3.8/site-packages \
